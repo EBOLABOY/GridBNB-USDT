@@ -71,6 +71,9 @@
     # 如不设置，INITIAL_PRINCIPAL 和 INITIAL_BASE_PRICE 默认为 0
     INITIAL_PRINCIPAL=1000.0  # 你的初始总资产 (USDT)
     INITIAL_BASE_PRICE=600.0   # 你认为合适的初始基准价格 (用于首次启动确定方向)
+    
+    # 如果需要使用代理的话开启本配置，指向代理服务器端口，本地调测使用，实盘建议部署服务器上
+    # HTTP_PROXY =  http://127.0.0.1:XXXXX
     ```
     *   **重要**: 确保你的币安 API Key 具有现货交易权限，但**不要**开启提现权限。
 

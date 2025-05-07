@@ -11,6 +11,9 @@ class ExchangeClient:
         self.logger = logging.getLogger(self.__class__.__name__)
         self._verify_credentials()
         
+        # 获取代理配置，如果环境变量中没有设置，则使用None
+        proxy = os.getenv('HTTP_PROXY')
+        
         # 先初始化交易所实例
         self.exchange = ccxt.binance({
             'apiKey': os.getenv('BINANCE_API_KEY'),
@@ -31,13 +34,15 @@ class ExchangeClient:
                 'warnOnFetchOpenOrdersWithoutSymbol': False,
                 'createMarketBuyOrderRequiresPrice': False
             },
-            'proxies': None,  # 完全禁用代理
+            'aiohttp_proxy': proxy,  # 使用环境变量中的代理配置
             'verbose': DEBUG_MODE
         })
-        
+        if proxy:
+            self.logger.info(f"使用代理: {proxy}")
         # 然后进行其他配置
         self.logger.setLevel(logging.INFO)
         self.logger.info("交易所客户端初始化完成")
+
         
         self.markets_loaded = False
         self.time_diff = 0
