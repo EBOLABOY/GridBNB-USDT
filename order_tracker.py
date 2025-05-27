@@ -101,14 +101,20 @@ class OrderTracker:
             self.logger.error(f"备份交易历史失败: {str(e)}")
 
     def add_trade(self, trade):
-        """添加交易记录"""
+        """添加交易记录（自动去重）"""
+        # -------- NEW: 去重 ----------
+        if any(t['order_id'] == trade.get('order_id') for t in self.trade_history):
+            self.logger.debug(f"重复 order_id {trade.get('order_id')} 已忽略")
+            return
+        # -----------------------------
+
         # 验证必要字段
         required_fields = ['timestamp', 'side', 'price', 'amount', 'order_id']
         for field in required_fields:
             if field not in trade:
                 self.logger.error(f"交易记录缺少必要字段: {field}")
                 return
-        
+
         # 验证数据类型
         try:
             trade['timestamp'] = float(trade['timestamp'])
@@ -117,7 +123,7 @@ class OrderTracker:
         except (ValueError, TypeError) as e:
             self.logger.error(f"交易记录数据类型错误: {str(e)}")
             return
-        
+
         self.logger.info(f"添加交易记录: {trade}")
         self.trade_history.append(trade)
         if len(self.trade_history) > 100:
