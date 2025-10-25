@@ -1460,6 +1460,99 @@ class GridTrader:
             precision = int(self.amount_precision) if self.amount_precision is not None else 3
             return float(f"{amount:.{precision}f}")
 
+    def _normalize_order_amount(self, amount: float, price: float) -> tuple[str | float, float, float] | None:
+        """应用交易所限制并返回下单数量、浮点数量和名义金额"""
+        if amount is None or price is None or price <= 0:
+            return None
+
+        try:
+            normalized_amount = float(amount)
+        except (TypeError, ValueError):
+            return None
+
+        if normalized_amount <= 0:
+            return None
+
+        limits = (self.symbol_info or {}).get('limits') or {}
+        amount_limits = limits.get('amount') or {}
+        cost_limits = limits.get('cost') or {}
+
+        def _safe_float(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return None
+
+        min_amount = _safe_float(amount_limits.get('min'))
+        max_amount = _safe_float(amount_limits.get('max'))
+        min_cost = _safe_float(cost_limits.get('min'))
+        max_cost = _safe_float(cost_limits.get('max'))
+
+        if min_amount is not None and normalized_amount < min_amount:
+            normalized_amount = min_amount
+        if min_cost is not None and min_cost > 0:
+            min_amount_from_cost = min_cost / price
+            if normalized_amount < min_amount_from_cost:
+                normalized_amount = min_amount_from_cost
+
+        if max_amount is not None and max_amount > 0 and normalized_amount > max_amount:
+            normalized_amount = max_amount
+        if max_cost is not None and max_cost > 0:
+            max_amount_from_cost = max_cost / price
+            if normalized_amount > max_amount_from_cost:
+                normalized_amount = max_amount_from_cost
+
+        precision_amount = self._adjust_amount_precision(normalized_amount)
+
+        try:
+            amount_float = float(precision_amount)
+        except (TypeError, ValueError):
+            return None
+
+        if amount_float <= 0:
+            return None
+
+        if min_amount is not None and amount_float < min_amount:
+            precision_amount = self._adjust_amount_precision(min_amount)
+            try:
+                amount_float = float(precision_amount)
+            except (TypeError, ValueError):
+                return None
+            if amount_float < min_amount:
+                return None
+
+        if min_cost is not None and min_cost > 0 and amount_float * price < min_cost:
+            target_amount = min_cost / price
+            precision_amount = self._adjust_amount_precision(target_amount)
+            try:
+                amount_float = float(precision_amount)
+            except (TypeError, ValueError):
+                return None
+            if amount_float * price < min_cost:
+                return None
+
+        if max_amount is not None and max_amount > 0 and amount_float > max_amount:
+            precision_amount = self._adjust_amount_precision(max_amount)
+            try:
+                amount_float = float(precision_amount)
+            except (TypeError, ValueError):
+                return None
+            if amount_float > max_amount:
+                return None
+
+        if max_cost is not None and max_cost > 0 and amount_float * price > max_cost:
+            target_amount = max_cost / price
+            precision_amount = self._adjust_amount_precision(target_amount)
+            try:
+                amount_float = float(precision_amount)
+            except (TypeError, ValueError):
+                return None
+            if amount_float * price > max_cost:
+                return None
+
+        notional = amount_float * price
+        return precision_amount, amount_float, notional
+
     def _adjust_price_precision(self, price):
         """根据交易所精度动态调整价格"""
         if self.price_precision is None:
@@ -2245,40 +2338,49 @@ class GridTrader:
                 return False
 
             current_price = self.current_price
+            if current_price is None or current_price <= 0:
+                self.logger.error("当前价格无效，无法执行AI交易")
+                return False
+
+            normalized = self._normalize_order_amount(trade_amount_usdt / current_price, current_price)
+            if not normalized:
+                self.logger.warning("AI建议交易数量在精度调整后无效，跳过")
+                return False
+
+            amount_for_order, amount_float, actual_notional = normalized
+
+            if amount_float <= 0:
+                self.logger.warning("AI建议交易数量调整后为0，跳过")
+                return False
 
             if side == 'buy':
-                # 买入：计算可购买数量
-                amount = trade_amount_usdt / current_price
-
-                # 确保有足够的USDT
-                if not await self._ensure_sufficient_balance('buy', current_price, amount):
+                if not await self._ensure_sufficient_balance('buy', current_price, amount_float):
                     self.logger.warning("AI建议买入但余额不足")
                     return False
-
             else:  # sell
-                # 卖出：计算卖出数量
-                amount = trade_amount_usdt / current_price
-
-                # 确保有足够的基础资产
-                if not await self._ensure_sufficient_balance('sell', current_price, amount):
+                if not await self._ensure_sufficient_balance('sell', current_price, amount_float):
                     self.logger.warning("AI建议卖出但余额不足")
                     return False
 
-            # 应用精度
-            if self.amount_precision is not None:
-                amount = round(amount, int(self.amount_precision))
+            trade_amount_usdt = actual_notional
+
+            if trade_amount_usdt < settings.MIN_TRADE_AMOUNT:
+                self.logger.warning(
+                    f"AI建议交易金额经调整后过小 ({trade_amount_usdt:.2f} USDT < {settings.MIN_TRADE_AMOUNT} USDT)，跳过"
+                )
+                return False
 
             self.logger.info(
                 f"执行AI建议交易 | "
                 f"方向: {side} | "
                 f"价格: {current_price:.4f} | "
-                f"数量: {amount:.6f} | "
+                f"数量: {amount_float:.6f} | "
                 f"金额: {trade_amount_usdt:.2f} USDT | "
                 f"置信度: {suggestion['confidence']}%"
             )
 
             # 执行交易
-            order = await self._execute_trade(side, current_price, amount)
+            order = await self._execute_trade(side, current_price, amount_for_order)
 
             if order:
                 # 记录AI交易
@@ -2286,7 +2388,7 @@ class GridTrader:
                     'timestamp': time.time(),
                     'side': side,
                     'price': current_price,
-                    'amount': amount,
+                    'amount': amount_float,
                     'type': 'ai_assisted',
                     'confidence': suggestion['confidence'],
                     'reason': suggestion['reason'],
@@ -2299,7 +2401,7 @@ class GridTrader:
                     f"交易对: {self.symbol}\n"
                     f"操作: {side.upper()}\n"
                     f"价格: {current_price:.4f} {self.quote_asset}\n"
-                    f"数量: {amount:.6f} {self.base_asset}\n"
+                    f"数量: {amount_float:.6f} {self.base_asset}\n"
                     f"金额: {trade_amount_usdt:.2f} {self.quote_asset}\n"
                     f"置信度: {suggestion['confidence']}%\n"
                     f"理由: {suggestion['reason']}\n"
