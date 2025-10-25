@@ -2051,6 +2051,41 @@ class GridTrader:
             self.logger.error(f"获取ADX数据失败: {str(e)}")
             return None
 
+    async def _ensure_sufficient_balance(self, side: str, price: float, amount: float) -> bool:
+        """AI交易余额检查包装，复用标准资金校验流程"""
+        try:
+            if price is None or price <= 0:
+                self.logger.error("价格无效，无法执行余额检查。")
+                return False
+
+            spot_balance = await self.exchange.fetch_balance({'type': 'spot'})
+            funding_balance = await self.exchange.fetch_funding_balance()
+
+            if side == 'buy':
+                required_quote = float(price) * float(amount)
+                return await self._ensure_balance_for_trade(
+                    side='buy',
+                    spot_balance=spot_balance,
+                    funding_balance=funding_balance,
+                    required_quote=required_quote
+                )
+            elif side == 'sell':
+                required_base = float(amount)
+                required_quote = float(price) * required_base
+                return await self._ensure_balance_for_trade(
+                    side='sell',
+                    spot_balance=spot_balance,
+                    funding_balance=funding_balance,
+                    required_quote=required_quote,
+                    required_base=required_base
+                )
+            else:
+                self.logger.error(f"未知交易方向: {side}")
+                return False
+        except Exception as e:
+            self.logger.error(f"AI余额检查失败({side}): {e}", exc_info=True)
+            return False
+
     def _calculate_ema(self, data, period):
         """计算EMA"""
         if not data or len(data) == 0:
@@ -2062,23 +2097,34 @@ class GridTrader:
             ema = (price - ema) * multiplier + ema
         return ema
 
-    async def _ensure_balance_for_trade(self, side: str, spot_balance: dict, funding_balance: dict) -> bool:
+    async def _ensure_balance_for_trade(
+        self,
+        side: str,
+        spot_balance: dict,
+        funding_balance: dict,
+        *,
+        required_quote: float | None = None,
+        required_base: float | None = None
+    ) -> bool:
         """
         【重构后】统一检查买卖双方的余额，并在需要时从理财赎回。
         """
         try:
             # 1. 确定所需资产和数量
-            amount_quote = await self._calculate_order_amount(side)
+            amount_quote = required_quote if required_quote is not None else await self._calculate_order_amount(side)
             if side == 'buy':
                 asset_needed = self.quote_asset
                 required_amount = amount_quote
                 spot_balance_asset = float(spot_balance.get('free', {}).get(self.quote_asset, 0) or 0)
             else: # side == 'sell'
-                if not self.current_price or self.current_price <= 0:
-                    self.logger.error(f"价格无效，无法计算卖出所需 {self.base_asset} 数量。")
-                    return False
+                if required_base is not None:
+                    required_amount = required_base
+                else:
+                    if not self.current_price or self.current_price <= 0:
+                        self.logger.error(f"价格无效，无法计算卖出所需 {self.base_asset} 数量。")
+                        return False
+                    required_amount = amount_quote / self.current_price
                 asset_needed = self.base_asset
-                required_amount = amount_quote / self.current_price
                 spot_balance_asset = float(spot_balance.get('free', {}).get(self.base_asset, 0) or 0)
 
             self.logger.info(f"{side}前余额检查 | 所需 {asset_needed}: {required_amount:.4f} | 现货可用: {spot_balance_asset:.4f}")
