@@ -118,6 +118,9 @@ class GridTrader:
         # AI策略相关状态变量
         self.last_volatility = 0  # 用于AI策略
 
+        # 资金锁：防止并发交易的资金竞态条件
+        self._balance_lock = asyncio.Lock()
+
     def _save_state(self):
         """【重构后】以原子方式安全地保存当前核心策略状态到文件"""
         state = {
@@ -2353,15 +2356,6 @@ class GridTrader:
                 self.logger.warning("AI建议交易数量调整后为0，跳过")
                 return False
 
-            if side == 'buy':
-                if not await self._ensure_sufficient_balance('buy', current_price, amount_float):
-                    self.logger.warning("AI建议买入但余额不足")
-                    return False
-            else:  # sell
-                if not await self._ensure_sufficient_balance('sell', current_price, amount_float):
-                    self.logger.warning("AI建议卖出但余额不足")
-                    return False
-
             trade_amount_usdt = actual_notional
 
             if trade_amount_usdt < settings.MIN_TRADE_AMOUNT:
@@ -2379,21 +2373,32 @@ class GridTrader:
                 f"置信度: {suggestion['confidence']}%"
             )
 
-            # 执行交易
-            order = await self._execute_trade(side, current_price, amount_for_order)
+            # 使用资金锁保护余额检查和下单的原子操作，防止并发竞态条件
+            async with self._balance_lock:
+                # 余额检查
+                if side == 'buy':
+                    if not await self._ensure_sufficient_balance('buy', current_price, amount_float):
+                        self.logger.warning("AI建议买入但余额不足")
+                        return False
+                else:  # sell
+                    if not await self._ensure_sufficient_balance('sell', current_price, amount_float):
+                        self.logger.warning("AI建议卖出但余额不足")
+                        return False
 
+                # 立即执行交易（在锁保护期间，防止其他操作占用资金）
+                order = await self._execute_trade(side, current_price, amount_for_order)
+
+            # 锁释放后处理订单记录
             if order:
-                # 记录AI交易
-                self.order_tracker.add_order({
-                    'timestamp': time.time(),
-                    'side': side,
-                    'price': current_price,
-                    'amount': amount_float,
-                    'type': 'ai_assisted',
-                    'confidence': suggestion['confidence'],
-                    'reason': suggestion['reason'],
-                    'risk_level': suggestion.get('risk_level', 'unknown')
-                })
+                # 修复 KeyError: 使用真实订单对象，添加 AI 相关字段
+                order_to_track = order.copy()  # 复制订单对象
+                order_to_track['type'] = 'ai_assisted'
+                order_to_track['confidence'] = suggestion['confidence']
+                order_to_track['reason'] = suggestion['reason']
+                order_to_track['risk_level'] = suggestion.get('risk_level', 'unknown')
+
+                # 记录AI交易（包含原始订单的 'id' 字段）
+                self.order_tracker.add_order(order_to_track)
 
                 # 发送AI交易通知
                 ai_message = (
