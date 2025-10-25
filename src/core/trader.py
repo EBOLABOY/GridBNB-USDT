@@ -264,9 +264,18 @@ class GridTrader:
 
             # 从市场信息中获取精度
             if self.symbol_info and 'precision' in self.symbol_info:
-                self.amount_precision = self.symbol_info['precision'].get('amount')
-                self.price_precision = self.symbol_info['precision'].get('price')
-                self.logger.info(f"交易对精度: 数量 {self.amount_precision}, 价格 {self.price_precision}")
+                try:
+                    amount_precision = self.symbol_info['precision'].get('amount')
+                    price_precision = self.symbol_info['precision'].get('price')
+
+                    self.amount_precision = int(float(amount_precision)) if amount_precision is not None else None
+                    self.price_precision = int(float(price_precision)) if price_precision is not None else None
+                    self.logger.info(f"交易对精度: 数量 {self.amount_precision}, 价格 {self.price_precision}")
+                except (ValueError, TypeError) as e:
+                    self.logger.warning(f"精度转换失败: amount={amount_precision}, price={price_precision}, error={e}")
+                    self.logger.warning("使用默认精度: 数量 6, 价格 2")
+                    self.amount_precision = 6
+                    self.price_precision = 2
             else:
                 self.logger.warning("无法获取交易对精度信息，将使用默认值")
                 # 使用动态默认精度，而不是硬编码BNB/USDT精度
@@ -1448,7 +1457,8 @@ class GridTrader:
             return self.exchange.exchange.amount_to_precision(self.symbol, amount)
         except Exception as e:
             self.logger.error(f"精度调整失败: {e}, 使用默认精度")
-            return float(f"{amount:.{self.amount_precision}f}")
+            precision = int(self.amount_precision) if self.amount_precision is not None else 3
+            return float(f"{amount:.{precision}f}")
 
     def _adjust_price_precision(self, price):
         """根据交易所精度动态调整价格"""
@@ -1462,7 +1472,8 @@ class GridTrader:
             return self.exchange.exchange.price_to_precision(self.symbol, price)
         except Exception as e:
             self.logger.error(f"价格精度调整失败: {e}, 使用默认精度")
-            return float(f"{price:.{self.price_precision}f}")
+            precision = int(self.price_precision) if self.price_precision is not None else 2
+            return float(f"{price:.{precision}f}")
 
     async def calculate_trade_amount(self, side, order_price):
         # 获取必要参数
@@ -2254,8 +2265,8 @@ class GridTrader:
                     return False
 
             # 应用精度
-            if self.amount_precision:
-                amount = round(amount, self.amount_precision)
+            if self.amount_precision is not None:
+                amount = round(amount, int(self.amount_precision))
 
             self.logger.info(
                 f"执行AI建议交易 | "
