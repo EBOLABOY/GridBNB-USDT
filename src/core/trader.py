@@ -2165,8 +2165,27 @@ class GridTrader:
                 self.logger.error("价格无效，无法执行余额检查。")
                 return False
 
+            # 强制刷新余额缓存，避免使用过期数据导致余额误判
+            self.exchange.balance_cache = {'timestamp': 0, 'data': None}
+            self.exchange.funding_balance_cache = {'timestamp': 0, 'data': {}}
+
+            self.logger.info(f"🔍 AI交易余额检查 | 方向: {side} | 价格: {price:.4f} | 数量: {amount:.6f}")
+
             spot_balance = await self.exchange.fetch_balance({'type': 'spot'})
             funding_balance = await self.exchange.fetch_funding_balance()
+
+            # 记录关键余额信息用于调试
+            spot_usdt = float(spot_balance.get('free', {}).get(self.quote_asset, 0) or 0)
+            spot_base = float(spot_balance.get('free', {}).get(self.base_asset, 0) or 0)
+            funding_usdt = float(funding_balance.get(self.quote_asset, 0) or 0)
+            funding_base = float(funding_balance.get(self.base_asset, 0) or 0)
+
+            self.logger.info(
+                f"💰 实时余额 | 现货 {self.quote_asset}: {spot_usdt:.4f} | "
+                f"理财 {self.quote_asset}: {funding_usdt:.4f} | "
+                f"现货 {self.base_asset}: {spot_base:.6f} | "
+                f"理财 {self.base_asset}: {funding_base:.6f}"
+            )
 
             if side == 'buy':
                 required_quote = float(price) * float(amount)
