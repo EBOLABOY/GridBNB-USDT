@@ -42,7 +42,7 @@ except ImportError:
 
 from src.strategies.technical_indicators import TechnicalIndicators
 from src.strategies.market_sentiment import get_market_sentiment
-from src.strategies.multi_timeframe import MultiTimeframeAnalyzer
+from src.strategies.multi_timeframe_analyzer import MultiTimeframeAnalyzer
 from src.strategies.market_microstructure import OrderBookAnalyzer
 from src.strategies.derivatives_data import DerivativesDataFetcher
 from src.strategies.correlation_analyzer import CorrelationAnalyzer

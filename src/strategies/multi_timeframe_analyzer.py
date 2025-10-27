@@ -418,6 +418,10 @@ class MultiTimeframeAnalyzer:
         """
         trends = [daily_trend, four_h_trend, one_h_trend]
 
+        # 如果任何周期数据不可用，返回未知状态
+        if any(t == 'unknown' for t in trends):
+            return "unknown"
+
         # 三周期完全一致
         if all(t == 'uptrend' for t in trends):
             return "strong_bullish_resonance"  # 强烈看涨共振
