@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 import logging
 import json
 from pydantic_settings import BaseSettings
-from typing import Optional, Dict
-from pydantic import field_validator, ConfigDict, ConfigDict
+from typing import Optional, Dict, Union
+from pydantic import field_validator, ConfigDict
 
 load_dotenv()
 
@@ -363,6 +363,32 @@ class Settings(BaseSettings):
             logging.warning(f"TAKE_PROFIT_DRAWDOWN 设置过小 ({v}%)，可能过于敏感")
         return v
 
+    @field_validator('LOG_LEVEL')
+    @classmethod
+    def validate_log_level(cls, v):
+        """验证日志级别，支持字符串(INFO/DEBUG等)或整数"""
+        if isinstance(v, str):
+            # 字符串映射到logging常量
+            level_map = {
+                'DEBUG': logging.DEBUG,
+                'INFO': logging.INFO,
+                'WARNING': logging.WARNING,
+                'ERROR': logging.ERROR,
+                'CRITICAL': logging.CRITICAL
+            }
+            level = level_map.get(v.upper())
+            if level is None:
+                raise ValueError(f"LOG_LEVEL 必须是 DEBUG/INFO/WARNING/ERROR/CRITICAL 之一，当前值: {v}")
+            return level
+        elif isinstance(v, int):
+            # 验证整数值是否有效
+            valid_levels = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
+            if v not in valid_levels:
+                raise ValueError(f"LOG_LEVEL 整数值必须是有效的logging级别，当前值: {v}")
+            return v
+        else:
+            raise ValueError(f"LOG_LEVEL 必须是字符串或整数，当前类型: {type(v)}")
+
     # --- 固定配置 (不常修改，保留在代码中) ---
     MIN_POSITION_PERCENT: float = 0.05
     MAX_POSITION_PERCENT: float = 0.15
@@ -372,7 +398,7 @@ class Settings(BaseSettings):
     SAFETY_MARGIN: float = 0.95
     AUTO_ADJUST_BASE_PRICE: bool = False
     PUSHPLUS_TIMEOUT: int = 5
-    LOG_LEVEL: int = logging.INFO
+    LOG_LEVEL: Union[int, str] = logging.INFO  # 支持字符串(INFO/DEBUG等)或整数
     DEBUG_MODE: bool = False
     API_TIMEOUT: int = 10000
     RECV_WINDOW: int = 5000
