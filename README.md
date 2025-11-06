@@ -174,9 +174,9 @@
 2. **配置环境变量**
    ```bash
    # 复制配置文件模板
-   cp .env.example .env
+   cp config/.env.example config/.env
 
-   # 编辑 .env 文件
+   # 编辑 config/.env 文件
    # 选择交易所: EXCHANGE=binance 或 EXCHANGE=okx
    # 填入对应的 API 密钥
    ```
@@ -216,9 +216,9 @@
 
 2. **配置和运行**
    ```bash
-   # 配置 .env 文件
-   cp .env.example .env
-   # 编辑 .env 文件，填入 API 密钥
+   # 配置 config/.env 文件
+   cp config/.env.example config/.env
+   # 编辑 config/.env 文件，填入 API 密钥
 
    # 运行程序
    python src/main.py
@@ -311,8 +311,8 @@ GridBNB-USDT/
 ├── docker/                     # Docker配置
 │   ├── Dockerfile
 │   └── docker-compose.yml
-├── .env.example                # 环境变量配置模板
 └── config/                     # 配置文件
+│   ├── .env.example            # 环境变量配置模板
     ├── .pre-commit-config.yaml # Pre-commit钩子配置
     └── pytest.ini              # Pytest配置
 ```

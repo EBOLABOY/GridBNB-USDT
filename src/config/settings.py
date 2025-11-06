@@ -521,7 +521,7 @@ class Settings(BaseSettings):
     MIN_BNB_TRANSFER: float = 0.01
 
     model_config = ConfigDict(
-        env_file=".env",
+        env_file="config/.env",
         env_file_encoding='utf-8',
         case_sensitive=True,
         extra='ignore'  # 忽略额外的字段
