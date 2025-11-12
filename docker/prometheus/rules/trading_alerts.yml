@@ -1,0 +1,198 @@
+# GridBNB 交易系统告警规则
+
+groups:
+  # 交易系统健康告警
+  - name: trading_system_health
+    interval: 30s
+    rules:
+      # 服务宕机告警
+      - alert: TradingBotDown
+        expr: up{job="gridbnb-bot"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GridBNB交易机器人服务已停止"
+          description: "交易机器人服务 {{ $labels.instance }} 已停止超过1分钟"
+
+      # 高CPU使用率告警
+      - alert: HighCPUUsage
+        expr: gridbnb_cpu_usage_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU使用率过高"
+          description: "CPU使用率持续超过80%已达5分钟,当前值: {{ $value }}%"
+
+      # 高内存使用率告警
+      - alert: HighMemoryUsage
+        expr: gridbnb_memory_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "内存使用率过高"
+          description: "内存使用率持续超过85%已达5分钟,当前值: {{ $value }}%"
+
+      # 磁盘空间不足告警
+      - alert: LowDiskSpace
+        expr: gridbnb_disk_usage_percent > 90
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "磁盘空间不足"
+          description: "磁盘使用率超过90%,当前值: {{ $value }}%"
+
+  # 交易相关告警
+  - name: trading_alerts
+    interval: 1m
+    rules:
+      # 订单失败率过高
+      - alert: HighOrderFailureRate
+        expr: |
+          (
+            rate(gridbnb_order_failures_total[5m])
+            /
+            (rate(gridbnb_orders_total[5m]) + 0.001)
+          ) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "订单失败率过高"
+          description: "交易对 {{ $labels.symbol }} 订单失败率超过10%"
+
+      # 订单延迟过高
+      - alert: HighOrderLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(gridbnb_order_latency_seconds_bucket[5m])
+          ) > 5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "订单执行延迟过高"
+          description: "交易对 {{ $labels.symbol }} 的95分位订单延迟超过5秒"
+
+      # API错误率过高
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            rate(gridbnb_api_errors_total[5m])
+            /
+            (rate(gridbnb_api_calls_total[5m]) + 0.001)
+          ) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API错误率过高"
+          description: "API方法 {{ $labels.method }} 错误率超过5%"
+
+  # 风险管理告警
+  - name: risk_management_alerts
+    interval: 1m
+    rules:
+      # 仓位过高告警
+      - alert: HighPositionRatio
+        expr: gridbnb_position_ratio > 0.95
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "仓位比例过高"
+          description: "交易对 {{ $labels.symbol }} 仓位比例超过95%,当前: {{ $value }}"
+
+      # 仓位过低告警
+      - alert: LowPositionRatio
+        expr: gridbnb_position_ratio < 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "仓位比例过低"
+          description: "交易对 {{ $labels.symbol }} 仓位比例低于5%,当前: {{ $value }}"
+
+      # 账户总价值异常下降
+      - alert: AccountValueDropping
+        expr: |
+          (
+            (gridbnb_total_account_value_usdt - gridbnb_total_account_value_usdt offset 1h)
+            /
+            gridbnb_total_account_value_usdt offset 1h
+          ) < -0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "账户总价值大幅下降"
+          description: "账户总价值1小时内下降超过10%"
+
+      # 持续亏损告警
+      - alert: ContinuousLoss
+        expr: gridbnb_profit_rate_percent < -5
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "持续亏损状态"
+          description: "交易对 {{ $labels.symbol }} 盈亏率低于-5%已持续1小时"
+
+  # 波动率异常告警
+  - name: volatility_alerts
+    interval: 5m
+    rules:
+      # 极端高波动率
+      - alert: ExtremeHighVolatility
+        expr: gridbnb_volatility > 1.0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "极端高波动率"
+          description: "交易对 {{ $labels.symbol }} 年化波动率超过100%,当前: {{ $value }}"
+
+      # 波动率急剧上升
+      - alert: VolatilitySurge
+        expr: |
+          (
+            (gridbnb_volatility - gridbnb_volatility offset 1h)
+            /
+            (gridbnb_volatility offset 1h + 0.01)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "波动率急剧上升"
+          description: "交易对 {{ $labels.symbol }} 波动率1小时内上升超过50%"
+
+  # 数据质量告警
+  - name: data_quality_alerts
+    interval: 5m
+    rules:
+      # 长时间无交易
+      - alert: NoRecentTrades
+        expr: time() - gridbnb_orders_total > 3600
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "长时间未执行交易"
+          description: "交易对 {{ $labels.symbol }} 超过1小时未执行任何交易"
+
+      # 指标数据缺失
+      - alert: MetricsNotReported
+        expr: |
+          absent(gridbnb_current_price) or
+          absent(gridbnb_grid_size_percent) or
+          absent(gridbnb_total_account_value_usdt)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "关键指标数据缺失"
+          description: "检测到关键交易指标数据缺失"

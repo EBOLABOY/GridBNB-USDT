@@ -1,0 +1,211 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gridbnb-usdt"
+version = "1.0.0"
+description = "企业级多币种自动化网格交易系统"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "GridBNB Team"}
+]
+keywords = ["trading", "binance", "grid-trading", "cryptocurrency", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "aiohttp>=3.9.1",
+    "aiofiles>=23.2.1",
+    "ccxt>=4.1.0",
+    "numpy>=1.26.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "tenacity>=8.2.3",
+    "psutil>=5.9.6",
+    "websockets>=12.0.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "pandas>=2.2.0",
+    "loguru>=0.7.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "flake8-docstrings>=1.7.0",
+    "flake8-bugbear>=23.0.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.4.0",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+]
+
+# ============================================================================
+# Black - Python 代码格式化工具
+# ============================================================================
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # 默认排除目录
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | venv
+  | __pycache__
+  | data
+  | nginx
+)/
+'''
+
+# ============================================================================
+# isort - 导入语句排序工具
+# ============================================================================
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_glob = ["venv/*", ".venv/*", "data/*", "nginx/*"]
+known_first_party = ["config", "trader", "exchange_client", "helpers"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+# ============================================================================
+# Flake8 - 代码质量检查工具
+# 注意: flake8 不支持 pyproject.toml,需要在 .flake8 或 setup.cfg 中配置
+# 这里仅作为参考,实际配置在 .flake8 文件中
+# ============================================================================
+
+# ============================================================================
+# mypy - 静态类型检查工具
+# ============================================================================
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # 初期宽松,逐步严格
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+pretty = true
+
+# 排除的模块
+exclude = [
+    "venv/",
+    ".venv/",
+    "build/",
+    "dist/",
+    "data/",
+    "nginx/",
+]
+
+# 第三方库配置
+[[tool.mypy.overrides]]
+module = [
+    "ccxt",
+    "ccxt.async_support",
+    "loguru",
+    "tenacity",
+]
+ignore_missing_imports = true
+
+# ============================================================================
+# pytest - 测试框架配置
+# ============================================================================
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--showlocals",
+    "--tb=short",
+    "--cov=.",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+# ============================================================================
+# Coverage.py - 代码覆盖率配置
+# ============================================================================
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/.venv/*",
+    "*/venv/*",
+    "*/setup.py",
+    "*/run_tests.py",
+    "*/__init__.py",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"

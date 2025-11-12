@@ -1,0 +1,159 @@
+# Pre-commit hooks 配置
+# 用法:
+#   pip install pre-commit
+#   pre-commit install
+#   pre-commit run --all-files  # 手动运行所有检查
+
+repos:
+  # ============================================================================
+  # 通用检查
+  # ============================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # 检查文件是否以换行符结尾
+      - id: end-of-file-fixer
+        exclude: \.min\.(js|css)$
+      # 移除文件末尾的空白字符
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      # 检查是否有合并冲突标记
+      - id: check-merge-conflict
+      # 检查 YAML 文件语法
+      - id: check-yaml
+        args: ['--unsafe']  # 允许自定义 YAML 标签
+      # 检查 TOML 文件语法
+      - id: check-toml
+      # 检查 JSON 文件语法
+      - id: check-json
+      # 检查是否有大文件被添加 (>500KB)
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      # 检查是否直接提交到主分支
+      - id: no-commit-to-branch
+        args: ['--branch', 'main', '--branch', 'master']
+      # 检查 Python 文件中的调试语句
+      - id: debug-statements
+      # 检查私钥文件
+      - id: detect-private-key
+      # 修复文件权限
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # ============================================================================
+  # Python 代码格式化 - Black
+  # ============================================================================
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--config=pyproject.toml']
+
+  # ============================================================================
+  # Python 导入排序 - isort
+  # ============================================================================
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ['--settings-path=pyproject.toml']
+
+  # ============================================================================
+  # Python 代码质量检查 - Flake8
+  # ============================================================================
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-bugbear
+        args: ['--config=.flake8']
+
+  # ============================================================================
+  # Python 类型检查 - mypy
+  # ============================================================================
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-requests
+          - types-aiofiles
+        args: ['--config-file=pyproject.toml']
+        # 只检查有类型注解的文件
+        files: ^(config|risk_manager|helpers)\.py$
+
+  # ============================================================================
+  # 安全检查 - Bandit
+  # ============================================================================
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        args: ['-c', 'pyproject.toml', '-r', '.']
+        additional_dependencies: ['bandit[toml]']
+        # 排除测试文件
+        exclude: ^tests/
+
+  # ============================================================================
+  # Markdown 文件检查
+  # ============================================================================
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        # 排除一些特殊的 Markdown 文件
+        exclude: (CHANGELOG\.md|\.github/)
+
+  # ============================================================================
+  # YAML 文件格式化
+  # ============================================================================
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.12.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2']
+
+# ============================================================================
+# 本地钩子 - 自定义检查
+# ============================================================================
+  - repo: local
+    hooks:
+      # 检查是否有 print 语句 (应该使用 logging)
+      - id: check-print-statements
+        name: Check for print statements
+        entry: '(?<!# noqa: T001)(?<![a-zA-Z_])print\('
+        language: pygrep
+        types: [python]
+        exclude: ^(tests/|run_tests\.py)
+
+      # 检查是否有 TODO/FIXME 注释
+      - id: check-todos
+        name: Check for TODO/FIXME comments
+        entry: '(TODO|FIXME|XXX|HACK):'
+        language: pygrep
+        types: [python]
+        # 只是警告,不阻止提交
+        stages: [manual]
+
+# ============================================================================
+# 全局配置
+# ============================================================================
+default_language_version:
+  python: python3.8
+
+# CI 环境配置
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

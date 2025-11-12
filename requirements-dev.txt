@@ -1,0 +1,36 @@
+# GridBNB-USDT Development Dependencies
+# Installation: pip install -r requirements-dev.txt
+
+# ============================================================================
+# Code Formatting Tools
+# ============================================================================
+black>=23.12.1             # Python code auto-formatter
+isort>=5.13.2              # Import statement sorter
+
+# ============================================================================
+# Code Quality Tools
+# ============================================================================
+flake8>=7.0.0              # Python code style checker
+flake8-docstrings>=1.7.0   # Docstring checker plugin
+flake8-bugbear>=23.0.0     # Bug and design issue detector
+mypy>=1.8.0                # Static type checker
+types-requests>=2.31.0     # Type stubs for requests
+types-aiofiles>=23.2.0     # Type stubs for aiofiles
+
+# ============================================================================
+# Security Tools
+# ============================================================================
+bandit[toml]>=1.7.6        # Security vulnerability scanner
+
+# ============================================================================
+# Testing Tools
+# ============================================================================
+pytest>=7.4.0              # Testing framework
+pytest-asyncio>=0.21.0     # Async test support
+pytest-cov>=4.1.0          # Code coverage reporting
+pytest-mock>=3.11.0        # Mock object support
+
+# ============================================================================
+# Git Hooks
+# ============================================================================
+pre-commit>=3.6.0          # Git pre-commit hook manager

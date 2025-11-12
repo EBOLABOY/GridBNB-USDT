@@ -1,0 +1,69 @@
+[flake8]
+# ============================================================================
+# Flake8 配置 - Python 代码质量检查
+# ============================================================================
+
+# 最大行长度 (与 Black 保持一致)
+max-line-length = 100
+
+# 最大复杂度 (圈复杂度)
+max-complexity = 15
+
+# 排除的目录和文件
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    build,
+    dist,
+    *.egg-info,
+    .tox,
+    .mypy_cache,
+    .pytest_cache,
+    data,
+    nginx,
+    migrations
+
+# 忽略的错误代码
+ignore =
+    # E203: whitespace before ':' (Black 格式化冲突)
+    E203,
+    # E501: line too long (由 Black 处理)
+    E501,
+    # W503: line break before binary operator (PEP 8 已更新)
+    W503,
+    # E402: module level import not at top of file
+    # E402,
+    # D100: Missing docstring in public module (逐步添加)
+    D100,
+    # D104: Missing docstring in public package
+    D104,
+
+# 启用的插件
+# flake8-docstrings: 文档字符串检查
+# flake8-bugbear: 检测潜在的 bug 和设计问题
+select =
+    # PyFlakes 错误
+    F,
+    # Pycodestyle 错误
+    E,
+    # Pycodestyle 警告
+    W,
+    # McCabe 复杂度
+    C,
+    # flake8-bugbear
+    B,
+    # flake8-docstrings
+    D,
+
+# Docstring 约定 (Google 风格)
+docstring-convention = google
+
+# 统计信息
+statistics = True
+count = True
+show-source = True
+
+# 并行检查 (加快速度)
+jobs = auto

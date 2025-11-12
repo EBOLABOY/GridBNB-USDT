@@ -1,0 +1,158 @@
+/* Logo样式 */
+.logo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
+  transition: all 0.2s ease;
+}
+
+/* 折叠触发器 */
+.trigger {
+  font-size: 18px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #3B82F6;
+}
+
+/* 用户下拉菜单hover效果 */
+.user-dropdown:hover {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+/* 菜单项动画优化 */
+.ant-menu-item,
+.ant-menu-submenu-title {
+  transition: all 0.2s ease !important;
+}
+
+.ant-menu-item:hover,
+.ant-menu-submenu-title:hover {
+  transform: translateX(2px);
+}
+
+/* 卡片hover效果 */
+.ant-card {
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 按钮hover效果 */
+.ant-btn {
+  transition: all 0.2s ease;
+}
+
+/* 表格行hover效果 */
+.ant-table-tbody > tr:hover > td {
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+
+/* 确保所有文字都有良好的对比度 */
+.ant-typography {
+  color: #1F2937;
+}
+
+.ant-card-head-title {
+  color: #111827 !important;
+  font-weight: 600;
+}
+
+.ant-table-thead > tr > th {
+  color: #111827 !important;
+  font-weight: 600;
+}
+
+.ant-table-tbody > tr > td {
+  color: #1F2937 !important;
+}
+
+/* Tag组件对比度优化 */
+.ant-tag {
+  font-weight: 500;
+}
+
+/* 输入框文字对比度 */
+.ant-input,
+.ant-input-number-input,
+.ant-select-selection-item {
+  color: #111827 !important;
+}
+
+/* Placeholder文字 */
+.ant-input::placeholder,
+.ant-input-number-input::placeholder {
+  color: #9CA3AF !important;
+}
+
+/* 平滑滚动 */
+* {
+  scroll-behavior: smooth;
+}
+
+/* 自定义滚动条 - 浅色模式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* 暗色模式滚动条 */
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* 暗色模式文字对比度 */
+[data-theme='dark'] .ant-typography {
+  color: #F1F5F9;
+}
+
+[data-theme='dark'] .ant-card-head-title {
+  color: #F1F5F9 !important;
+}
+
+[data-theme='dark'] .ant-table-thead > tr > th {
+  color: #CBD5E1 !important;
+}
+
+[data-theme='dark'] .ant-table-tbody > tr > td {
+  color: #F1F5F9 !important;
+}
+
+[data-theme='dark'] .ant-input,
+[data-theme='dark'] .ant-input-number-input,
+[data-theme='dark'] .ant-select-selection-item {
+  color: #F1F5F9 !important;
+}
+
+

@@ -1,0 +1,16 @@
+# Grafana 仪表盘自动配置
+# 自动加载dashboards目录下的所有仪表盘
+
+apiVersion: 1
+
+providers:
+  - name: 'GridBNB Dashboards'
+    orgId: 1
+    folder: 'GridBNB Trading'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true

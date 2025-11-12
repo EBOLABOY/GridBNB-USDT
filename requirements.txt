@@ -4,7 +4,8 @@ aiofiles>=23.2.1
 ccxt>=4.1.0
 numpy>=1.26.0
 python-dotenv>=1.0.0
-uvicorn>=0.25.0 # ASGI server, potentially needed for aiohttp
+uvicorn>=0.25.0  # ASGI server for FastAPI
+fastapi>=0.109.0  # FastAPI web framework
 requests>=2.31.0
 tenacity>=8.2.3
 psutil>=5.9.6
@@ -19,3 +20,23 @@ passlib>=1.7.4
 python-multipart>=0.0.6
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
+cryptography>=41.0.0  # API密钥加密
+
+# 结构化日志 (阶段2优化)
+structlog>=25.4.0
+python-json-logger>=4.0.0
+
+# 配置热重载 (阶段4优化)
+watchdog>=6.0.0
+
+# 监控系统 (Day 4-7优化)
+prometheus-client>=0.19.0
+
+# 数据库 (企业级前端升级 - Phase 1)
+sqlalchemy>=2.0.0  # ORM框架
+aiosqlite>=0.19.0  # 异步SQLite支持
+alembic>=1.13.0  # 数据库迁移工具（可选）
+
+# AI辅助交易 (AI Strategy)
+openai>=1.51.0  # OpenAI GPT-4/GPT-3.5
+anthropic>=0.39.0  # Claude API

@@ -1,0 +1,404 @@
+{
+  "project_name": "GridBNB-USDT",
+  "description": "企业级多币种自动化网格交易系统 - 支持币安现货交易",
+  "last_scan_time": "2025-10-17T14:45:30+08:00",
+  "scan_timestamp_unix": 1697520330,
+  "repository": {
+    "type": "git",
+    "remote": "https://github.com/EBOLABOY/GridBNB-USDT.git",
+    "branch": "main"
+  },
+  "scan_summary": {
+    "total_files_estimated": 27,
+    "files_scanned": 20,
+    "coverage_percentage": 74.1,
+    "python_files": 12,
+    "config_files": 5,
+    "documentation_files": 3,
+    "ignored_directories": [
+      "__pycache__",
+      ".git",
+      ".github",
+      "data",
+      "venv",
+      ".venv"
+    ]
+  },
+  "modules": [
+    {
+      "name": "main",
+      "path": "main.py",
+      "type": "entry_point",
+      "language": "python",
+      "lines_of_code": 157,
+      "description": "应用入口，管理多币种并发交易",
+      "key_functions": [
+        "main()",
+        "run_trader_for_symbol()",
+        "periodic_global_status_logger()"
+      ],
+      "dependencies": [
+        "trader.GridTrader",
+        "exchange_client.ExchangeClient",
+        "config.TradingConfig",
+        "helpers.LogConfig"
+      ],
+      "entry_point": "main()",
+      "test_coverage": "low",
+      "important_paths": [
+        "main.py"
+      ]
+    },
+    {
+      "name": "trader",
+      "path": "trader.py",
+      "type": "core_logic",
+      "language": "python",
+      "lines_of_code": 2042,
+      "description": "网格交易核心逻辑，包含信号检测、订单执行、波动率计算",
+      "key_classes": [
+        "GridTrader"
+      ],
+      "key_methods": [
+        "initialize()",
+        "main_loop()",
+        "_check_buy_signal()",
+        "_check_sell_signal()",
+        "execute_order()",
+        "adjust_grid_size()",
+        "_calculate_volatility()"
+      ],
+      "dependencies": [
+        "exchange_client.ExchangeClient",
+        "order_tracker.OrderTracker",
+        "risk_manager.AdvancedRiskManager",
+        "position_controller_s1.PositionControllerS1"
+      ],
+      "data_models": [
+        "交易状态（base_price, grid_size, highest, lowest）",
+        "EWMA 波动率状态",
+        "订单跟踪状态"
+      ],
+      "test_coverage": "partial",
+      "important_paths": [
+        "trader.py",
+        "data/trader_state_*.json"
+      ]
+    },
+    {
+      "name": "exchange_client",
+      "path": "exchange_client.py",
+      "type": "api_wrapper",
+      "language": "python",
+      "lines_of_code": 542,
+      "description": "币安交易所 API 封装，处理交易、余额查询、理财操作",
+      "key_classes": [
+        "ExchangeClient"
+      ],
+      "key_methods": [
+        "load_markets()",
+        "fetch_ticker()",
+        "fetch_balance()",
+        "fetch_funding_balance()",
+        "create_order()",
+        "transfer_to_savings()",
+        "transfer_to_spot()",
+        "calculate_total_account_value()",
+        "sync_time()"
+      ],
+      "dependencies": [
+        "ccxt.async_support",
+        "config.settings"
+      ],
+      "api_integrations": [
+        "Binance Spot API",
+        "Binance Simple Earn API"
+      ],
+      "test_coverage": "low",
+      "important_paths": [
+        "exchange_client.py"
+      ]
+    },
+    {
+      "name": "position_controller_s1",
+      "path": "position_controller_s1.py",
+      "type": "strategy",
+      "language": "python",
+      "lines_of_code": 319,
+      "description": "S1 辅助策略：基于52日高低点的仓位控制",
+      "key_classes": [
+        "PositionControllerS1"
+      ],
+      "key_methods": [
+        "update_daily_s1_levels()",
+        "check_and_execute()",
+        "_fetch_and_calculate_s1_levels()",
+        "_execute_s1_adjustment()"
+      ],
+      "dependencies": [
+        "trader.GridTrader",
+        "risk_manager.RiskState"
+      ],
+      "test_coverage": "missing",
+      "important_paths": [
+        "position_controller_s1.py"
+      ]
+    },
+    {
+      "name": "risk_manager",
+      "path": "risk_manager.py",
+      "type": "risk_control",
+      "language": "python",
+      "lines_of_code": 142,
+      "description": "高级风险管理器，控制仓位限制和风控状态",
+      "key_classes": [
+        "AdvancedRiskManager",
+        "RiskState"
+      ],
+      "key_methods": [
+        "check_position_limits()",
+        "_get_position_ratio()",
+        "_get_position_value()"
+      ],
+      "dependencies": [
+        "config.settings"
+      ],
+      "test_coverage": "partial",
+      "important_paths": [
+        "risk_manager.py"
+      ]
+    },
+    {
+      "name": "order_tracker",
+      "path": "order_tracker.py",
+      "type": "data_management",
+      "language": "python",
+      "lines_of_code": 314,
+      "description": "订单跟踪与交易历史管理",
+      "key_classes": [
+        "OrderTracker",
+        "OrderThrottler"
+      ],
+      "key_methods": [
+        "add_trade()",
+        "get_trade_history()",
+        "save_trade_history()",
+        "get_statistics()",
+        "analyze_trades()"
+      ],
+      "data_models": [
+        "交易记录（timestamp, side, price, amount, profit, order_id）"
+      ],
+      "test_coverage": "low",
+      "important_paths": [
+        "order_tracker.py",
+        "data/trade_history.json",
+        "data/trade_history.backup.json"
+      ]
+    },
+    {
+      "name": "web_server",
+      "path": "web_server.py",
+      "type": "web_interface",
+      "language": "python",
+      "lines_of_code": 698,
+      "description": "实时监控 Web 界面，支持多币种视图，包含认证、API端点、前端UI",
+      "key_functions": [
+        "start_web_server()",
+        "handle_log()",
+        "handle_status()",
+        "handle_symbols()",
+        "handle_log_content()"
+      ],
+      "key_classes": [
+        "IPLogger"
+      ],
+      "dependencies": [
+        "aiohttp",
+        "trader.GridTrader",
+        "psutil",
+        "aiofiles"
+      ],
+      "api_endpoints": [
+        "/ (GET) - 主监控页面（带认证）",
+        "/api/status (GET) - 获取交易状态（带认证，支持多币种参数）",
+        "/api/symbols (GET) - 获取交易对列表（带认证）",
+        "/api/logs (GET) - 获取日志内容（带认证）"
+      ],
+      "test_coverage": "partial",
+      "important_paths": [
+        "web_server.py"
+      ],
+      "scan_status": "complete"
+    },
+    {
+      "name": "config",
+      "path": "config.py",
+      "type": "configuration",
+      "language": "python",
+      "lines_of_code": 208,
+      "description": "统一配置管理，使用 Pydantic 进行验证",
+      "key_classes": [
+        "Settings",
+        "TradingConfig"
+      ],
+      "config_sources": [
+        ".env 文件",
+        "环境变量",
+        "代码内默认值"
+      ],
+      "key_parameters": [
+        "BINANCE_API_KEY",
+        "BINANCE_API_SECRET",
+        "SYMBOLS",
+        "INITIAL_PARAMS_JSON",
+        "MIN_TRADE_AMOUNT",
+        "MAX_POSITION_RATIO",
+        "MIN_POSITION_RATIO",
+        "ENABLE_SAVINGS_FUNCTION"
+      ],
+      "test_coverage": "partial",
+      "important_paths": [
+        "config.py",
+        ".env",
+        ".env.example"
+      ]
+    },
+    {
+      "name": "helpers",
+      "path": "helpers.py",
+      "type": "utilities",
+      "language": "python",
+      "lines_of_code": 151,
+      "description": "工具函数：日志管理、通知推送、消息格式化",
+      "key_functions": [
+        "format_trade_message()",
+        "send_pushplus_message()",
+        "safe_fetch()",
+        "debug_watcher()"
+      ],
+      "key_classes": [
+        "LogConfig"
+      ],
+      "test_coverage": "low",
+      "important_paths": [
+        "helpers.py",
+        "trading_system.log"
+      ]
+    },
+    {
+      "name": "monitor",
+      "path": "monitor.py",
+      "type": "monitoring",
+      "language": "python",
+      "lines_of_code": 100,
+      "description": "交易监控逻辑，负责采集和聚合交易状态数据",
+      "key_classes": [
+        "TradingMonitor"
+      ],
+      "key_methods": [
+        "get_current_status()",
+        "add_trade()",
+        "get_trade_history()"
+      ],
+      "dependencies": [
+        "trader.GridTrader",
+        "datetime"
+      ],
+      "scan_status": "complete",
+      "test_coverage": "unknown",
+      "important_paths": [
+        "monitor.py"
+      ]
+    }
+  ],
+  "tests": {
+    "framework": "pytest",
+    "test_files": [
+      "tests/__init__.py",
+      "tests/test_config.py",
+      "tests/test_trader.py",
+      "tests/test_risk_manager.py",
+      "tests/test_web_auth.py"
+    ],
+    "run_command": "python run_tests.py",
+    "coverage_summary": "部分关键模块已覆盖，缺少 API 模拟测试和 S1 策略测试"
+  },
+  "deployment": {
+    "method": "docker",
+    "orchestration": "docker-compose",
+    "services": [
+      {
+        "name": "gridbnb-bot",
+        "image": "custom (Dockerfile)",
+        "port": 58181,
+        "description": "交易机器人主服务"
+      },
+      {
+        "name": "nginx",
+        "image": "nginx:alpine",
+        "ports": [80, 443],
+        "description": "反向代理服务"
+      }
+    ],
+    "health_checks": true,
+    "persistent_volumes": [
+      "./data:/app/data"
+    ]
+  },
+  "quality_tools": {
+    "linter": "未配置",
+    "formatter": "未配置",
+    "type_checker": "未配置",
+    "security_scanner": "未配置"
+  },
+  "coverage_gaps": {
+    "missing_tests": [
+      "exchange_client.py - API 模拟测试",
+      "position_controller_s1.py - S1 策略单元测试",
+      "monitor.py - 监控逻辑测试"
+    ],
+    "missing_documentation": [
+      "API 文档（接口规范）",
+      "架构决策记录（ADR）"
+    ]
+  },
+  "recommended_next_steps": [
+    "优先补充：exchange_client.py 的 API 模拟测试",
+    "深度分析：position_controller_s1.py 的策略参数调优逻辑",
+    "文档完善：生成 API 接口文档（Swagger/OpenAPI）",
+    "代码质量：配置 black（格式化）和 mypy（类型检查）"
+  ],
+  "ignored_files": {
+    "patterns": [
+      "__pycache__/**",
+      "*.pyc",
+      ".git/**",
+      ".github/**",
+      "data/**",
+      "venv/**",
+      ".venv/**",
+      "*.log",
+      "*.log.*",
+      ".env",
+      "dist/**",
+      "build/**",
+      "*.egg-info/**"
+    ],
+    "reason": "运行时生成文件、缓存、版本控制、敏感信息"
+  },
+  "scan_metadata": {
+    "tool": "Claude AI Code Assistant",
+    "strategy": "三阶段扫描（全仓清点 → 模块优先 → 深度补捞）",
+    "improvements": [
+      "完整扫描了 monitor.py（100 行）",
+      "完整扫描了 web_server.py（698 行）"
+    ],
+    "limitations": [
+      "未读取数据文件（data/ 目录）",
+      "未执行代码静态分析（如复杂度计算）"
+    ],
+    "truncated": false,
+    "scan_duration_estimate": "约 8 分钟"
+  }
+}

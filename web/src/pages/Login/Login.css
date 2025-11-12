@@ -1,0 +1,233 @@
+/* Ant Design Pro 风格登录页面 */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f2f5;
+  padding: 32px 16px;
+}
+
+.login-content {
+  display: flex;
+  width: 100%;
+  max-width: 1000px;
+  align-items: center;
+}
+
+/* 左侧品牌区 */
+.login-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 80px;
+}
+
+.login-brand {
+  margin-bottom: 40px;
+}
+
+.brand-logo {
+  font-size: 72px;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.brand-title {
+  font-size: 40px !important;
+  font-weight: 600 !important;
+  color: #1f1f1f !important;
+  margin-bottom: 16px !important;
+  line-height: 1.2 !important;
+}
+
+.brand-subtitle {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.45);
+  display: block;
+  margin-top: 16px;
+}
+
+.login-description {
+  max-width: 480px;
+}
+
+.description-text {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.8;
+  display: block;
+}
+
+/* 右侧表单区 */
+.login-right {
+  width: 400px;
+  flex-shrink: 0;
+}
+
+.login-form-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  padding: 40px 40px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 0;
+}
+
+.login-other {
+  margin-top: 24px;
+  text-align: center;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 表单样式优化 */
+.login-form-wrapper .ant-input-affix-wrapper,
+.login-form-wrapper .ant-input {
+  height: 40px;
+  border-radius: 4px;
+}
+
+.login-form-wrapper .ant-input-affix-wrapper {
+  padding: 0 11px;
+}
+
+.login-form-wrapper .ant-input {
+  font-size: 14px;
+}
+
+.login-form-wrapper .ant-btn-primary {
+  height: 40px;
+  font-size: 16px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.login-form-wrapper .ant-form-item {
+  margin-bottom: 20px;
+}
+
+.login-form-wrapper .ant-checkbox-wrapper {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.login-form-wrapper a {
+  color: #1890ff;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.login-form-wrapper a:hover {
+  color: #40a9ff;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+  .login-content {
+    flex-direction: column;
+    max-width: 400px;
+  }
+
+  .login-left {
+    padding-right: 0;
+    padding-bottom: 48px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .login-description {
+    margin: 0 auto;
+  }
+
+  .login-right {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .login-container {
+    padding: 16px;
+  }
+
+  .login-form-wrapper {
+    padding: 32px 24px 24px;
+  }
+
+  .login-left {
+    padding-bottom: 32px;
+  }
+
+  .brand-logo {
+    font-size: 64px;
+  }
+
+  .brand-title {
+    font-size: 32px !important;
+  }
+
+  .brand-subtitle {
+    font-size: 16px;
+  }
+
+  .description-text {
+    font-size: 14px;
+  }
+}
+
+/* 动画效果 */
+.login-container {
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.login-form-wrapper {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-brand {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+

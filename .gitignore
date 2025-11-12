@@ -88,8 +88,9 @@ celerybeat-schedule
 
 # Environments
 .env
+config/.env
 # 但不排除示例环境文件
-!.env.example
+!config/.env.example
 .venv
 env/
 venv/
@@ -120,8 +121,23 @@ data/
 *.log
 *.log.*
 
+# 测试覆盖率
+coverage.json
+
+# 根目录临时测试文件
+/test_*.py
+
+# 归档脚本目录
+scripts/archive/
+
 # Windows specific
 *.stackdump
 *.exe.stackdump
 
 update_git.ps1
+
+# Claude Code 本地配置
+.claude/settings.local.json
+
+# Spec Workflow 会话数据
+.spec-workflow/session.json
