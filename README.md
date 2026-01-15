@@ -5,6 +5,11 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Binance](https://img.shields.io/badge/Exchange-Binance-yellow.svg)](https://www.binance.com/)
 
+> [!IMPORTANT]
+> 本项目已停止维护（归档仅供参考）。后续重构与持续维护请移步： https://github.com/EBOLABOY/strathub
+>
+> 请不要在本仓库提交 Issue/PR；相关反馈请到新仓库。
+
 一个基于 Python 的企业级自动化交易程序，支持币安 (Binance) 交易所的**任意多种交易对**。采用先进的网格交易策略，结合动态波动率分析和多层风险管理，旨在稳定捕捉市场波动收益。
 
 ## ✨ 核心特性
@@ -344,8 +349,7 @@ docker stats
 ### 获取帮助
 
 - 📖 **详细文档**: 查看 `NGINX_DEPLOYMENT.md` 和 `DOCKER_INSTALLATION_GUIDE.md`
-- 🐛 **问题反馈**: 提交 GitHub Issues
-- 💬 **社区讨论**: GitHub Discussions
+- 🐛 **问题反馈/需求讨论**: https://github.com/EBOLABOY/strathub/issues
 
 ## ⚠️ 风险提示
 
@@ -413,22 +417,9 @@ git commit -m "feat: your feature description"
 
 ## 🤝 贡献
 
-欢迎贡献代码！请遵循以下步骤：
+本仓库已停止维护，不再接受新的 PR/Issue。
 
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 安装开发工具 (`pip install -r requirements-dev.txt && pre-commit install`)
-4. 编写代码并确保通过所有检查 (格式化、类型检查、测试)
-5. 提交更改 (`git commit -m 'feat: Add some AmazingFeature'`)
-6. 推送到分支 (`git push origin feature/AmazingFeature`)
-7. 开启 Pull Request
-
-**代码质量要求**:
-- ✅ 通过 Black 格式化 (行长 100)
-- ✅ 通过 Flake8 代码检查
-- ✅ 添加必要的类型注解
-- ✅ 包含单元测试 (如适用)
-- ✅ 更新相关文档
+如需参与后续重构与维护，请前往新仓库： https://github.com/EBOLABOY/strathub
 
 ## 🙏 致谢
 
@@ -447,7 +438,7 @@ git commit -m "feat: your feature description"
 
 <p>
   <a href="https://t.me/+b9fKO9kEOkg2ZjI1"><img alt="Telegram" src="https://img.shields.io/badge/Telegram-群组交流-28A8EA?style=flat-square&logo=telegram"></a>
-  <a href="https://github.com/EBOLABOY/GridBNB-USDT/issues"><img alt="Issues" src="https://img.shields.io/github/issues/EBOLABOY/GridBNB-USDT?style=flat-square&logo=github&label=Issues"></a>
+  <a href="https://github.com/EBOLABOY/strathub/issues"><img alt="Issues" src="https://img.shields.io/github/issues/EBOLABOY/strathub?style=flat-square&logo=github&label=Issues"></a>
   </p>
 
 </div>
